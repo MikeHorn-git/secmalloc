@@ -2,23 +2,15 @@
 School Project
 
 # Compilation
-## Dynamic & Static
 ```bash
+# Dynamic & Static
 make
-```
-
-## Dynamic
-```bash
+# Dynamic
 make dynamic
-```
-
-## Static
-```bash
+# Static
 make static
-```
-
-## Clean
-```bash
+# Clean
+make clean # or
 make distclean
 ```
 
