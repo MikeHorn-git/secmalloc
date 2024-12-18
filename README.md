@@ -1,6 +1,25 @@
 # Description
 
-School Project
+Custom malloc(), calloc(), realloc() and free(). With features such as double-free detection, buffer overflow prevention, and memory leak checks.
+
+# Features
+
+* Custom Memory Management: Efficient allocation, reallocation, and deallocation tailored to specific needs.
+* Security Enhancements:
+  * Canary values to detect heap overflows.
+  * Double-free detection to prevent misuse.
+  * Automatic zeroing of freed memory blocks.
+* Leak Detection: Identifies and reports memory leaks on program exit.
+* Extensible Logging: Logs memory operations when enabled via the MSM_OUTPUT environment variable.
+* Memory Pool Resizing: Dynamically grows memory pools to accommodate larger allocations.
+
+# Installation
+
+```bash
+git clone https://github.com/yourusername/secmalloc.git
+cd secmalloc/example
+make
+```
 
 # Makefile
 
@@ -21,6 +40,22 @@ Targets:
 
 ```bash
 LD_PRELOAD=./libmy_secmalloc.so ls
+```
+
+# Unit Test
+
+Made with [Criterion](https://github.com/Snaipe/Criterion).
+
+* Memory Allocation: Validates my_malloc for zero-size, small-size, large-size, and multiple allocations.
+* Zero Initialization: Ensures my_calloc correctly zeroes out memory.
+* Reallocation: Verifies behavior of my_realloc for resizing and pointer reuse.
+* Freeing Memory: Checks proper deallocation and reuse of memory blocks.
+* Double-Free Detection: Tests the library's ability to detect and handle double-free errors.
+* Buffer Overflow Detection: Simulates canary value corruption to ensure buffer overflows are caught.
+* Memory Leak Detection: Tests the detection of unfreed memory at program exit.
+
+```bash
+make test
 ```
 
 # Authors
