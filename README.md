@@ -13,7 +13,52 @@ Custom malloc(), calloc(), realloc() and free(). With features such as double-fr
 * Extensible Logging: Logs memory operations when enabled via the MSM_OUTPUT environment variable.
 * Memory Pool Resizing: Dynamically grows memory pools to accommodate larger allocations.
 
-# Installation
+# Architecture
+
+```mermaid
+graph TD
+    Start([Start Program]) --> Initialize[Initialize memory manager]
+    Initialize --> InitializePools[Initialize memory pools]
+    Initialize --> InitializeFreedPointers[Initialize freed pointers]
+    Initialize --> InitializeCanary[Generate canary value]
+
+    subgraph MemoryAllocation[Memory Allocation Operations]
+        Allocate[Allocate memory] --> |my_malloc| MallocFlow
+        MallocFlow[Check for free block or resize pool] --> |Found| ReturnPtr([Return pointer to block])
+        MallocFlow --> |Not Found| ResizePools[Resize pools and retry allocation]
+
+        Allocate --> |my_calloc| CallocFlow
+        CallocFlow[Allocate zero-initialized memory] --> Allocate
+
+        Allocate --> |my_realloc| ReallocFlow
+        ReallocFlow[Reallocate memory with size adjustments] --> Allocate
+        ReallocFlow --> FreeOld[Free old memory block if required]
+    end
+
+    subgraph MemoryFree[Memory Freeing Operations]
+        FreeMemory[Free allocated memory] --> CheckDoubleFree[Check for double free]
+        CheckDoubleFree --> |Detected| ExitDoubleFree([Exit due to double free error])
+        CheckDoubleFree --> |Not Detected| MarkAsFreed[Mark pointer as freed]
+
+        MarkAsFreed --> ValidateCanary[Check canary value for corruption]
+        ValidateCanary --> |Corrupted| ExitCanaryError([Exit due to canary corruption])
+        ValidateCanary --> MarkBlockFree[Mark block as free and update metadata]
+    end
+
+    subgraph MemoryChecks[Memory Validation and Cleanup]
+        CheckCanaries[Validate all active blocks' canary values]
+        CheckLeaks[Check for memory leaks]
+        UnmapMemory[Unmap memory pools]
+    end
+
+    Start --> MemoryAllocation
+    Start --> MemoryFree
+    MemoryAllocation --> MemoryChecks
+    MemoryFree --> MemoryChecks
+    MemoryChecks --> CleanUp[Clean up resources at exit]
+```
+
+# Build
 
 ```bash
 git clone https://github.com/yourusername/secmalloc.git
